@@ -1,0 +1,28 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+model Keyword {
+  id        Int      @id @default(autoincrement())
+  program   String
+  keyword   String   @unique
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model News {
+  id        Int      @id @default(autoincrement())
+  title     String
+  media     String
+  date      String
+  url       String   @unique
+  keyword   String
+  program   String
+  status    String   @default("Belum diperiksa")
+  createdAt DateTime @default(now())
+}
