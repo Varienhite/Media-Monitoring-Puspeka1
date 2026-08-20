@@ -344,35 +344,33 @@ export default function Dashboard() {
     <div className="min-h-screen bg-neutral-50 text-neutral-900 p-6 font-sans">
       <div className="max-w-6xl mx-auto">
         
-        {/* Header Section with creative branding layout */}
-        <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-neutral-200 pb-6">
-          <div className="flex flex-col text-left space-y-1">
-            {/* Top Brand Category */}
-            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-indigo-600">
-              Kementerian Pendidikan Dasar dan Menengah
-            </p>
-            
-            {/* Middle Row: Title + Logo 3 Inline */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 py-0.5">
-              <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight leading-none">
-                Pusat Penguatan Karakter
-              </h1>
-              {/* Visual Divider between text and logo */}
-              <div className="hidden sm:block h-6 w-px bg-neutral-300" />
-              {/* Logo 3 inline */}
-              <div className="h-10 sm:h-11 flex items-center justify-center">
-                <img 
-                  src="/Logo/Logo 3.png" 
-                  alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
-                  className="h-full w-auto object-contain"
-                />
-              </div>
+        {/* Header Section with Satker & Kemendikdasmen branding + Logo 3 */}
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-neutral-200 pb-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto text-center sm:text-left">
+            {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
+            <div className="h-16 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img 
+                src="/Logo/Logo 3.png" 
+                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
+                className="h-full w-auto object-contain"
+              />
             </div>
             
-            {/* Bottom Subtitle / App Description */}
-            <p className="text-xs sm:text-sm text-neutral-500 font-semibold italic">
-              Sistem Monitoring Media Online & Kurasi Berita Terpadu
-            </p>
+            {/* Visual separator line (hidden on mobile) */}
+            <div className="hidden sm:block h-12 w-px bg-neutral-300" />
+            
+            {/* Branding Text Block */}
+            <div className="space-y-0.5 text-center sm:text-left">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">
+                Kementerian Pendidikan Dasar dan Menengah
+              </p>
+              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
+                Pusat Penguatan Karakter
+              </h1>
+              <p className="text-xs text-neutral-500 font-bold">
+                Sistem Monitoring Media Online & Kurasi Berita Terpadu
+              </p>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
@@ -529,7 +527,7 @@ export default function Dashboard() {
             </div>
             
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-1.5">Filter Tanggal</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-455 mb-1.5">Filter Tanggal</label>
               <select 
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
@@ -543,7 +541,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-1.5">Filter Keyword</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-455 mb-1.5">Filter Keyword</label>
               <select 
                 value={selectedKeyword}
                 onChange={(e) => setSelectedKeyword(e.target.value)}
@@ -568,7 +566,7 @@ export default function Dashboard() {
                   className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition duration-150 active:scale-95 cursor-pointer ${
                     selectedProgram === prog
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                      : 'bg-white text-neutral-555 border-neutral-200 hover:border-neutral-300 hover:text-neutral-800'
+                      : 'bg-white text-neutral-555 border-neutral-200 hover:border-neutral-300 hover:text-neutral-850'
                   }`}
                 >
                   {prog}
@@ -580,7 +578,7 @@ export default function Dashboard() {
           {/* Baris 3: Status Filter Tabs & Export Button */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-1 border-t border-neutral-200">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">Status Kurasi</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-2">Status Kurasi</label>
               <div className="flex flex-wrap gap-2">
                 {statusOptions.map((stat) => (
                   <button
@@ -589,7 +587,7 @@ export default function Dashboard() {
                     className={`px-4 py-1.5 rounded-xl text-xs font-bold border transition duration-150 active:scale-95 cursor-pointer ${
                       selectedStatus === stat
                         ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                        : 'bg-white text-neutral-555 border-neutral-200 hover:border-neutral-300 hover:text-neutral-800'
+                        : 'bg-white text-neutral-555 border-neutral-200 hover:border-neutral-300 hover:text-neutral-850'
                     }`}
                   >
                     {stat}
@@ -690,7 +688,7 @@ export default function Dashboard() {
                           <select
                             value={item.status}
                             onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                            className="bg-white border border-neutral-200 text-xs font-bold px-2 py-1.5 rounded-lg text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-655 cursor-pointer"
+                            className="bg-white border border-neutral-200 text-xs font-bold px-2 py-1.5 rounded-lg text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-650 cursor-pointer"
                           >
                             <option value="Belum diperiksa">Belum diperiksa</option>
                             <option value="Relevan">Relevan</option>
