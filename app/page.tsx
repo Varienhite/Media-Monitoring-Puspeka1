@@ -317,9 +317,9 @@ export default function Dashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Penting':
-        return <span className="bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">⭐ Penting</span>;
+        return <span className="bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">Penting</span>;
       case 'Perlu perhatian':
-        return <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">⚠️ Perlu Perhatian</span>;
+        return <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">Perlu Perhatian</span>;
       case 'Relevan':
         return <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex-shrink-0">Relevan</span>;
       case 'Tidak relevan':
@@ -332,11 +332,11 @@ export default function Dashboard() {
   const getSentimentBadge = (sentiment: string) => {
     switch (sentiment) {
       case 'Positif':
-        return <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">😊 Positif</span>;
+        return <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">Positif</span>;
       case 'Negatif':
-        return <span className="bg-rose-50 text-rose-700 border border-rose-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">😠 Negatif</span>;
+        return <span className="bg-rose-50 text-rose-700 border border-rose-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">Negatif</span>;
       default:
-        return <span className="bg-neutral-100 text-neutral-600 border border-neutral-200 text-[11px] font-bold px-2 py-1 rounded-lg flex-shrink-0">😐 Netral</span>;
+        return <span className="bg-neutral-100 text-neutral-600 border border-neutral-200 text-[11px] font-bold px-2 py-1 rounded-lg flex-shrink-0">Netral</span>;
     }
   };
 
@@ -376,7 +376,7 @@ export default function Dashboard() {
                   href="/keywords"
                   className="bg-white hover:bg-neutral-50 text-neutral-850 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 transition shadow-sm active:scale-95 flex items-center gap-1.5"
                 >
-                  ⚙️ Pengaturan Keyword
+                  Pengaturan Keyword
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -390,7 +390,7 @@ export default function Dashboard() {
                 href="/login"
                 className="bg-white hover:bg-neutral-50 text-neutral-850 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 transition shadow-sm active:scale-95 flex items-center gap-1.5"
               >
-                🔑 Login Admin
+                Login Admin
               </Link>
             )}
             
@@ -408,7 +408,7 @@ export default function Dashboard() {
                   Menarik Berita...
                 </>
               ) : (
-                <>🔄 Tarik Berita Baru</>
+                <>Tarik Berita Baru</>
               )}
             </button>
           </div>
@@ -445,14 +445,14 @@ export default function Dashboard() {
         {/* Sentiment Analysis Visual Breakdown Panel */}
         <section className="bg-white border border-neutral-200 p-6 rounded-3xl shadow-sm mb-6">
           <h2 className="text-sm font-black uppercase tracking-wider text-neutral-700 mb-4 flex items-center gap-1.5">
-            📊 Persentase Sentimen Pemberitaan
+            Persentase Sentimen Pemberitaan
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
             {/* Visual Progress Bar Chart */}
             <div className="md:col-span-2 space-y-4">
               <div>
                 <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
-                  <span>😊 Sentimen Positif</span>
+                  <span>Sentimen Positif</span>
                   <span className="text-emerald-600 font-extrabold">{sentimentStats.positifPct}% ({sentimentStats.positif} berita)</span>
                 </div>
                 <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
@@ -465,7 +465,7 @@ export default function Dashboard() {
               
               <div>
                 <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
-                  <span>😠 Sentimen Negatif</span>
+                  <span>Sentimen Negatif</span>
                   <span className="text-rose-600 font-extrabold">{sentimentStats.negatifPct}% ({sentimentStats.negatif} berita)</span>
                 </div>
                 <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
@@ -478,7 +478,7 @@ export default function Dashboard() {
 
               <div>
                 <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
-                  <span>😐 Sentimen Netral</span>
+                  <span>Sentimen Netral</span>
                   <span className="text-neutral-500 font-extrabold">{sentimentStats.netralPct}% ({sentimentStats.netral} berita)</span>
                 </div>
                 <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
@@ -597,7 +597,7 @@ export default function Dashboard() {
               disabled={filteredNews.length === 0}
               className="bg-white hover:bg-neutral-50 disabled:bg-neutral-100 disabled:text-neutral-400 border border-neutral-200 text-neutral-800 px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-2 self-end md:self-auto cursor-pointer active:scale-95"
             >
-              📊 Unduh Laporan (Excel)
+              Unduh Laporan (Excel)
             </button>
           </div>
         </section>

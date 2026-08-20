@@ -165,26 +165,26 @@ export default function KeywordSettings() {
             href="/"
             className="flex items-center gap-2 bg-white hover:bg-neutral-50 text-neutral-800 px-4 py-2 rounded-xl text-sm font-bold transition border border-neutral-200 shadow-sm"
           >
-            ← Kembali ke Dashboard
+            Kembali ke Dashboard
           </a>
         </header>
 
         {error && (
-          <div className="bg-neutral-105 border border-neutral-250 text-neutral-800 px-4 py-3 rounded-xl text-sm mb-6 flex items-center gap-2">
-            ⚠️ {error}
+          <div className="bg-neutral-105 border border-neutral-250 text-neutral-800 px-4 py-3 rounded-xl text-sm mb-6">
+            {error}
           </div>
         )}
         {success && (
-          <div className="bg-neutral-900 border border-neutral-900 text-white px-4 py-3 rounded-xl text-sm mb-6 flex items-center gap-2">
-            ✅ {success}
+          <div className="bg-neutral-900 border border-neutral-900 text-white px-4 py-3 rounded-xl text-sm mb-6">
+            {success}
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Form Tambah Keyword */}
           <div className="bg-white border border-neutral-200 p-6 rounded-2xl shadow-sm h-fit">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
-              ➕ Tambah Keyword
+            <h2 className="text-lg font-bold text-neutral-900 mb-4">
+              Tambah Keyword
             </h2>
             <form onSubmit={handleAddKeyword} className="space-y-4">
               <div>
