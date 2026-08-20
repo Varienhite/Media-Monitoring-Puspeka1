@@ -39,24 +39,25 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-5">
-        {/* Branding Logos */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <div className="h-14 flex items-center justify-center">
-            <img 
-              src="/Logo/Logo 1.png" 
-              alt="Logo Kemendikdasmen - Pusat Penguatan Karakter" 
-              className="h-full w-auto object-contain"
-            />
-          </div>
-          <div className="hidden sm:block h-6 w-px bg-neutral-350" />
-          <div className="h-10 flex items-center justify-center">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
+        {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
+        <div className="flex justify-center">
+          <div className="h-16 flex items-center justify-center">
             <img 
               src="/Logo/Logo 3.png" 
-              alt="Logo Slogan" 
+              alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
               className="h-full w-auto object-contain"
             />
           </div>
+        </div>
+
+        <div className="space-y-1">
+          <h1 className="text-2xl font-extrabold text-neutral-900 tracking-tight">
+            Pusat Penguatan Karakter
+          </h1>
+          <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">
+            Kementerian Pendidikan Dasar dan Menengah
+          </p>
         </div>
       </div>
 
@@ -98,7 +99,7 @@ export default function LoginPage() {
 
               <Link
                 href="/"
-                className="w-full flex justify-center py-2.5 px-4 border border-neutral-200 rounded-xl text-sm font-bold text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none transition text-center cursor-pointer"
+                className="w-full flex justify-center py-2.5 px-4 border border-neutral-200 rounded-xl text-sm font-bold text-neutral-770 bg-white hover:bg-neutral-50 focus:outline-none transition text-center cursor-pointer"
               >
                 Kembali ke Dashboard
               </Link>

@@ -346,26 +346,22 @@ export default function Dashboard() {
         
         {/* Header Section with Satker & Kemendikdasmen branding */}
         <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-neutral-200 pb-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
-            {/* Logo 1: Kemendikdasmen - Pusat Penguatan Karakter */}
-            <div className="h-16 flex items-center justify-center">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
+            <div className="h-16 flex items-center justify-center overflow-hidden flex-shrink-0">
               <img 
-                src="/Logo/Logo 1.png" 
-                alt="Logo Kemendikdasmen - Pusat Penguatan Karakter" 
+                src="/Logo/Logo 3.png" 
+                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
                 className="h-full w-auto object-contain"
               />
             </div>
             
-            {/* Visual separator line (hidden on small screens) */}
-            <div className="hidden sm:block h-10 w-px bg-neutral-350" />
-            
-            {/* Logo 3 */}
-            <div className="h-12 flex items-center justify-center">
-              <img 
-                src="/Logo/Logo 3.png" 
-                alt="Logo Slogan" 
-                className="h-full w-auto object-contain"
-              />
+            <div className="space-y-0.5 text-left">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar dan Menengah</p>
+              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
+                Pusat Penguatan Karakter
+              </h1>
+              <p className="text-xs text-neutral-500 font-bold">Sistem Monitoring Media Online & Kurasi Berita Terpadu</p>
             </div>
           </div>
           
