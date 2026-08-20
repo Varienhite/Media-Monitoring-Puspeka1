@@ -359,11 +359,11 @@ export default function Dashboard() {
             {/* Visual separator line (hidden on small screens) */}
             <div className="hidden sm:block h-10 w-px bg-neutral-350" />
             
-            {/* Logo 2: Pendidikan Bermutu Untuk Semua */}
+            {/* Logo 3 */}
             <div className="h-12 flex items-center justify-center">
               <img 
-                src="/Logo/Logo 2.png" 
-                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
+                src="/Logo/Logo 3.png" 
+                alt="Logo Slogan" 
                 className="h-full w-auto object-contain"
               />
             </div>
