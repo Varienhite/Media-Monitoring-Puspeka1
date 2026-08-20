@@ -39,24 +39,30 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        {/* Branding Layout with Logo 3 on the left and titles on the right */}
-        <div className="flex items-center justify-center gap-4 mb-2">
-          {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
-          <div className="h-14 flex items-center justify-center overflow-hidden flex-shrink-0">
-            <img 
-              src="/Logo/Logo 3.png" 
-              alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
-              className="h-full w-auto object-contain"
-            />
-          </div>
+      <div className="sm:mx-auto sm:w-full sm:max-w-xl text-center space-y-4">
+        {/* Branding header in Login Page */}
+        <div className="flex flex-col items-center space-y-1.5">
+          <p className="text-[9px] font-black uppercase tracking-widest text-indigo-600">
+            Kementerian Pendidikan Dasar dan Menengah
+          </p>
           
-          <div className="space-y-0.5 text-left">
-            <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar</p>
-            <h1 className="text-lg font-black text-neutral-900 leading-tight">
+          <div className="flex flex-col sm:flex-row items-center gap-3 py-1">
+            <h1 className="text-xl sm:text-2xl font-black text-neutral-900 tracking-tight">
               Pusat Penguatan Karakter
             </h1>
+            <div className="hidden sm:block h-5 w-px bg-neutral-350" />
+            <div className="h-10 flex items-center justify-center">
+              <img 
+                src="/Logo/Logo 3.png" 
+                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
+                className="h-full w-auto object-contain"
+              />
+            </div>
           </div>
+          
+          <p className="text-xs text-neutral-450 font-bold italic">
+            Sistem Monitoring Media Online & Kurasi Berita Terpadu
+          </p>
         </div>
       </div>
 

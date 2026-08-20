@@ -344,25 +344,35 @@ export default function Dashboard() {
     <div className="min-h-screen bg-neutral-50 text-neutral-900 p-6 font-sans">
       <div className="max-w-6xl mx-auto">
         
-        {/* Header Section with Satker & Kemendikdasmen branding */}
-        <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-neutral-200 pb-6">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
-            <div className="h-16 flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img 
-                src="/Logo/Logo 3.png" 
-                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
-                className="h-full w-auto object-contain"
-              />
-            </div>
+        {/* Header Section with creative branding layout */}
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-neutral-200 pb-6">
+          <div className="flex flex-col text-left space-y-1">
+            {/* Top Brand Category */}
+            <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-indigo-600">
+              Kementerian Pendidikan Dasar dan Menengah
+            </p>
             
-            <div className="space-y-0.5 text-left">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar dan Menengah</p>
-              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
+            {/* Middle Row: Title + Logo 3 Inline */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 py-0.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight leading-none">
                 Pusat Penguatan Karakter
               </h1>
-              <p className="text-xs text-neutral-500 font-bold">Sistem Monitoring Media Online & Kurasi Berita Terpadu</p>
+              {/* Visual Divider between text and logo */}
+              <div className="hidden sm:block h-6 w-px bg-neutral-300" />
+              {/* Logo 3 inline */}
+              <div className="h-10 sm:h-11 flex items-center justify-center">
+                <img 
+                  src="/Logo/Logo 3.png" 
+                  alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
+                  className="h-full w-auto object-contain"
+                />
+              </div>
             </div>
+            
+            {/* Bottom Subtitle / App Description */}
+            <p className="text-xs sm:text-sm text-neutral-500 font-semibold italic">
+              Sistem Monitoring Media Online & Kurasi Berita Terpadu
+            </p>
           </div>
           
           <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
@@ -506,7 +516,7 @@ export default function Dashboard() {
           {/* Baris 1: Pencarian & Dropdown Dropdowns */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Cari Judul / Media / Keyword</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-1.5">Cari Judul / Media / Keyword</label>
               <div className="relative">
                 <input 
                   type="text"
@@ -519,7 +529,7 @@ export default function Dashboard() {
             </div>
             
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Filter Tanggal</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-1.5">Filter Tanggal</label>
               <select 
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
@@ -533,7 +543,7 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1.5">Filter Keyword</label>
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-450 mb-1.5">Filter Keyword</label>
               <select 
                 value={selectedKeyword}
                 onChange={(e) => setSelectedKeyword(e.target.value)}
@@ -619,7 +629,7 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div className="text-center py-20 bg-white border border-neutral-200 rounded-2xl text-neutral-400">
+            <div className="text-center py-20 bg-white border border-neutral-200 rounded-2xl text-neutral-450">
               <svg className="animate-spin mx-auto h-8 w-8 text-neutral-900 mb-3" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
