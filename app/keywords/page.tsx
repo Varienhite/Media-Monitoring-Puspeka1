@@ -1,11 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function KeywordSettings() {
   const [keywords, setKeywords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
+  const router = useRouter();
 
   // Form states
   const [newProgram, setNewProgram] = useState('7 KAIH');
@@ -15,8 +19,26 @@ export default function KeywordSettings() {
   const programs = ['7 KAIH', 'BSAN', 'Rukun Sama Teman', 'SAIH', 'Pembatasan Gawai', 'Lainnya'];
 
   useEffect(() => {
-    fetchKeywords();
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth');
+      const data = await res.json();
+      if (data.authenticated) {
+        setAuthenticated(true);
+        fetchKeywords();
+      } else {
+        router.push('/login');
+      }
+    } catch (err) {
+      console.error(err);
+      router.push('/login');
+    } finally {
+      setAuthChecking(false);
+    }
+  };
 
   const fetchKeywords = async () => {
     try {
@@ -118,6 +140,16 @@ export default function KeywordSettings() {
       setError('Gagal menghubungi server.');
     }
   };
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center text-sm font-bold text-neutral-450">Memverifikasi akses admin...</div>
+      </div>
+    );
+  }
+
+  if (!authenticated) return null;
 
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 p-6 font-sans">

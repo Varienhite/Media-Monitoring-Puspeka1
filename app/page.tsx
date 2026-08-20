@@ -1,14 +1,14 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import Link from 'next/link';
 
 export default function Dashboard() {
   const [news, setNews] = useState<any[]>([]);
-  const [filteredNews, setFilteredNews] = useState<any[]>([]);
-  const [stats, setStats] = useState({ total: 0, kaih: 0, bsan: 0, rukun: 0, saih: 0, gawai: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   
   // State Filter & Pencarian
   const [search, setSearch] = useState('');
@@ -28,8 +28,29 @@ export default function Dashboard() {
   const statusOptions = ['Semua', 'Penting', 'Perlu perhatian', 'Relevan', 'Tidak relevan', 'Belum diperiksa'];
 
   useEffect(() => {
+    checkAuth();
     fetchNews();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth');
+      const data = await res.json();
+      setAuthenticated(data.authenticated);
+    } catch (err) {
+      console.error("Gagal memeriksa status auth:", err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' });
+      setAuthenticated(false);
+      window.location.reload();
+    } catch (err) {
+      console.error("Gagal logout:", err);
+    }
+  };
 
   const fetchNews = async () => {
     setRefreshing(true);
@@ -38,8 +59,6 @@ export default function Dashboard() {
       const data = await res.json();
       if (data && data.success) {
         setNews(data.news);
-        setFilteredNews(data.news);
-        setStats(data.stats);
       }
     } catch (err) {
       console.error("Gagal mengambil data:", err);
@@ -49,10 +68,9 @@ export default function Dashboard() {
     }
   };
 
-  // Filter logic
-  useEffect(() => {
+  // Derived state: filteredNews
+  const filteredNews = useMemo(() => {
     let result = news;
-    
     if (selectedProgram !== 'Semua') {
       result = result.filter((n) => n.program === selectedProgram);
     }
@@ -73,9 +91,43 @@ export default function Dashboard() {
         n.keyword.toLowerCase().includes(q)
       );
     }
-    setFilteredNews(result);
-    setCurrentPage(1); // Reset to page 1 on filter or search change
-  }, [search, selectedProgram, selectedStatus, selectedDate, selectedKeyword, news]);
+    return result;
+  }, [news, selectedProgram, selectedStatus, selectedDate, selectedKeyword, search]);
+
+  // Derived state: stats (total per program)
+  const stats = useMemo(() => {
+    return {
+      total: news.length,
+      kaih: news.filter(n => n.program === '7 KAIH').length,
+      bsan: news.filter(n => n.program === 'BSAN').length,
+      rukun: news.filter(n => n.program === 'Rukun Sama Teman').length,
+      saih: news.filter(n => n.program === 'SAIH').length,
+      gawai: news.filter(n => n.program === 'Pembatasan Gawai').length,
+    };
+  }, [news]);
+
+  // Derived state: sentimentStats (total per sentiment)
+  const sentimentStats = useMemo(() => {
+    const total = news.length;
+    const positif = news.filter(n => n.sentiment === 'Positif').length;
+    const negatif = news.filter(n => n.sentiment === 'Negatif').length;
+    const netral = news.filter(n => n.sentiment === 'Netral').length;
+    
+    return {
+      total,
+      positif,
+      negatif,
+      netral,
+      positifPct: total > 0 ? Math.round((positif / total) * 100) : 0,
+      negatifPct: total > 0 ? Math.round((negatif / total) * 100) : 0,
+      netralPct: total > 0 ? Math.round((netral / total) * 100) : 0,
+    };
+  }, [news]);
+
+  // Reset to page 1 on filter or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedProgram, selectedStatus, selectedDate, selectedKeyword]);
 
   // Paginated news variables
   const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
@@ -85,23 +137,9 @@ export default function Dashboard() {
   );
 
   const handleStatusChange = async (id: number, newStatus: string) => {
-    // Update local state for immediate response
     const updatedNews = news.map(n => n.id === id ? { ...n, status: newStatus } : n);
     setNews(updatedNews);
     
-    // Recalculate stats dynamically based on local state update
-    const total = updatedNews.length;
-    const newStats = {
-      total,
-      kaih: updatedNews.filter(n => n.program === '7 KAIH').length,
-      bsan: updatedNews.filter(n => n.program === 'BSAN').length,
-      rukun: updatedNews.filter(n => n.program === 'Rukun Sama Teman').length,
-      saih: updatedNews.filter(n => n.program === 'SAIH').length,
-      gawai: updatedNews.filter(n => n.program === 'Pembatasan Gawai').length,
-    };
-    setStats(newStats);
-    
-    // Save to database
     await fetch('/api/news', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -109,9 +147,25 @@ export default function Dashboard() {
     });
   };
 
+  const handleSentimentChange = async (id: number, newSentiment: string) => {
+    const updatedNews = news.map(n => n.id === id ? { ...n, sentiment: newSentiment } : n);
+    setNews(updatedNews);
+    
+    await fetch('/api/news', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, sentiment: newSentiment }),
+    });
+  };
+
   // Extract unique dates and keywords from data for dynamic filters
-  const uniqueDates = Array.from(new Set(news.map(n => n.date))).sort((a, b) => b.localeCompare(a));
-  const uniqueKeywords = Array.from(new Set(news.map(n => n.keyword))).sort();
+  const uniqueDates = useMemo(() => {
+    return Array.from(new Set(news.map(n => n.date))).sort((a, b) => b.localeCompare(a));
+  }, [news]);
+
+  const uniqueKeywords = useMemo(() => {
+    return Array.from(new Set(news.map(n => n.keyword))).sort();
+  }, [news]);
 
   // Excel Export
   const getIndonesianFileName = () => {
@@ -125,13 +179,11 @@ export default function Dashboard() {
   };
 
   const handleExportExcel = async () => {
-    // Create workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Media Monitoring', {
-      views: [{ showGridLines: true }] // Ensure gridlines are visible
+      views: [{ showGridLines: true }]
     });
 
-    // Define Columns with clean layouts
     worksheet.columns = [
       { header: 'No', key: 'no', width: 8 },
       { header: 'Tanggal', key: 'tanggal', width: 18 },
@@ -139,32 +191,28 @@ export default function Dashboard() {
       { header: 'Judul', key: 'judul', width: 95 },
       { header: 'Program', key: 'program', width: 26 },
       { header: 'Status', key: 'status', width: 22 },
+      { header: 'Sentimen', key: 'sentiment', width: 16 },
       { header: 'Link', key: 'link', width: 22 }
     ];
 
-    // Format header row (Row 1) - Basic Black and White (Light Gray background, Black text)
     const headerRow = worksheet.getRow(1);
-    headerRow.height = 32; // taller headers for clean padding
+    headerRow.height = 32;
     headerRow.eachCell((cell) => {
-      // Light Gray Fill
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: 'FFF2F2F2' }
       };
-      // Bold Black Font
       cell.font = {
         name: 'Segoe UI',
         bold: true,
         size: 11,
         color: { argb: 'FF000000' }
       };
-      // Centered Alignment
       cell.alignment = {
         horizontal: 'center',
         vertical: 'middle'
       };
-      // High-contrast borders
       cell.border = {
         top: { style: 'thin', color: { argb: 'FF7F7F7F' } },
         left: { style: 'thin', color: { argb: 'FF7F7F7F' } },
@@ -173,7 +221,6 @@ export default function Dashboard() {
       };
     });
 
-    // Add data rows and format them
     filteredNews.forEach((n, i) => {
       const row = worksheet.addRow({
         no: i + 1,
@@ -182,10 +229,11 @@ export default function Dashboard() {
         judul: n.title,
         program: n.program,
         status: n.status,
-        link: 'Buka Berita' // friendly visual text
+        sentiment: n.sentiment || 'Netral',
+        link: 'Buka Berita'
       });
 
-      row.height = 35; // generous height for line spacing and vertical middle alignment
+      row.height = 35;
 
       const cellNo = row.getCell('no');
       const cellTanggal = row.getCell('tanggal');
@@ -193,18 +241,18 @@ export default function Dashboard() {
       const cellJudul = row.getCell('judul');
       const cellProgram = row.getCell('program');
       const cellStatus = row.getCell('status');
+      const cellSentiment = row.getCell('sentiment');
       const cellLink = row.getCell('link');
 
-      // Alignments
       cellNo.alignment = { horizontal: 'center', vertical: 'middle' };
       cellTanggal.alignment = { horizontal: 'center', vertical: 'middle' };
       cellMedia.alignment = { horizontal: 'left', vertical: 'middle' };
       cellJudul.alignment = { horizontal: 'left', vertical: 'middle', wrapText: true };
       cellProgram.alignment = { horizontal: 'center', vertical: 'middle' };
       cellStatus.alignment = { horizontal: 'center', vertical: 'middle' };
+      cellSentiment.alignment = { horizontal: 'center', vertical: 'middle' };
       cellLink.alignment = { horizontal: 'center', vertical: 'middle' };
 
-      // Set standard styles across all columns in this row 
       row.eachCell((cell) => {
         cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FF000000' } };
         cell.fill = {
@@ -212,7 +260,6 @@ export default function Dashboard() {
           pattern: 'solid',
           fgColor: { argb: 'FFFFFFFF' }
         };
-        // Soft gray borders
         cell.border = {
           top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
           left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
@@ -221,7 +268,6 @@ export default function Dashboard() {
         };
       });
 
-      // Hyperlink formatting for Link column (Standard Blue link for functionality)
       cellLink.value = {
         text: 'Buka Berita ↗',
         hyperlink: n.url,
@@ -234,7 +280,6 @@ export default function Dashboard() {
         underline: true
       };
 
-      // Emphasize important status with bold font, but NO colored fills
       if (n.status === 'Penting' || n.status === 'Perlu perhatian') {
         cellStatus.font = {
           name: 'Segoe UI',
@@ -243,31 +288,55 @@ export default function Dashboard() {
           color: { argb: 'FF000000' }
         };
       }
+
+      if (n.sentiment === 'Negatif') {
+        cellSentiment.font = {
+          name: 'Segoe UI',
+          bold: true,
+          size: 10,
+          color: { argb: 'FFFF0000' }
+        };
+      } else if (n.sentiment === 'Positif') {
+        cellSentiment.font = {
+          name: 'Segoe UI',
+          bold: true,
+          size: 10,
+          color: { argb: 'FF008000' }
+        };
+      }
     });
 
-    // Write Excel binary buffer
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], { 
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
     });
     
-    // Trigger download
     saveAs(blob, getIndonesianFileName());
   };
   
-  // Curation Styling helper (Refined Minimalist with Soft Colors)
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Penting':
-        return <span className="bg-red-50 text-red-700 border border-red-200 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1">⭐ Penting</span>;
+        return <span className="bg-red-50 text-red-700 border border-red-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">⭐ Penting</span>;
       case 'Perlu perhatian':
-        return <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1">⚠️ Perlu Perhatian</span>;
+        return <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">⚠️ Perlu Perhatian</span>;
       case 'Relevan':
-        return <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2.5 py-1 rounded-lg">Relevan</span>;
+        return <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex-shrink-0">Relevan</span>;
       case 'Tidak relevan':
-        return <span className="bg-neutral-100 text-neutral-500 border border-neutral-200 text-xs font-semibold px-2.5 py-1 rounded-lg">Tidak Relevan</span>;
+        return <span className="bg-neutral-100 text-neutral-500 border border-neutral-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex-shrink-0">Tidak Relevan</span>;
       default:
-        return <span className="bg-white text-neutral-450 border border-neutral-200 text-xs font-semibold px-2.5 py-1 rounded-lg">Belum diperiksa</span>;
+        return <span className="bg-white text-neutral-450 border border-neutral-200 text-[11px] font-semibold px-2.5 py-1 rounded-lg flex-shrink-0">Belum diperiksa</span>;
+    }
+  };
+
+  const getSentimentBadge = (sentiment: string) => {
+    switch (sentiment) {
+      case 'Positif':
+        return <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">😊 Positif</span>;
+      case 'Negatif':
+        return <span className="bg-rose-50 text-rose-700 border border-rose-100 text-[11px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0">😠 Negatif</span>;
+      default:
+        return <span className="bg-neutral-100 text-neutral-600 border border-neutral-200 text-[11px] font-bold px-2 py-1 rounded-lg flex-shrink-0">😐 Netral</span>;
     }
   };
 
@@ -275,22 +344,81 @@ export default function Dashboard() {
     <div className="min-h-screen bg-neutral-50 text-neutral-900 p-6 font-sans">
       <div className="max-w-6xl mx-auto">
         
-        {/* Header Section */}
-        <header className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-neutral-200 pb-6">
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-neutral-900">
-              MEDIA MONITORING PUSPEKA
-            </h1>
-            <p className="text-sm text-neutral-500 mt-1">Pantau, kurasi, dan analisis berita program Puspeka secara otomatis</p>
+        {/* Header Section with Satker & Kemendikdasmen branding */}
+        <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-neutral-200 pb-6">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            {/* Logo Kemendikdasmen (Placeholder) */}
+            <div className="relative w-16 h-16 bg-white border border-neutral-200 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+              <img 
+                src="/logo-kemendikdasmen.png" 
+                alt="Logo Kemendikdasmen" 
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                  const parent = (e.target as HTMLElement).parentElement;
+                  if (parent && !parent.querySelector('.fallback-text')) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'fallback-text text-[9px] font-black text-center text-neutral-400 select-none uppercase px-1 leading-tight';
+                    fallback.innerText = 'Logo\nKementerian';
+                    parent.appendChild(fallback);
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Logo Puspeka (Placeholder) */}
+            <div className="relative w-16 h-16 bg-white border border-neutral-200 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+              <img 
+                src="/logo-puspeka.png" 
+                alt="Logo Puspeka" 
+                className="w-full h-full object-contain p-1"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                  const parent = (e.target as HTMLElement).parentElement;
+                  if (parent && !parent.querySelector('.fallback-text')) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'fallback-text text-[9px] font-black text-center text-neutral-400 select-none uppercase px-1 leading-tight';
+                    fallback.innerText = 'Logo\nPuspeka';
+                    parent.appendChild(fallback);
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar dan Menengah</p>
+              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
+                Pusat Penguatan Karakter
+              </h1>
+              <p className="text-xs text-neutral-500 font-bold">Sistem Monitoring Media Online & Kurasi Berita Terpadu</p>
+            </div>
           </div>
           
-          <div className="flex flex-wrap gap-3">
-            <a
-              href="/keywords"
-              className="bg-white hover:bg-neutral-50 text-neutral-850 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 transition shadow-sm active:scale-95"
-            >
-              ⚙️ Pengaturan Keyword
-            </a>
+          <div className="flex flex-wrap gap-3 w-full md:w-auto justify-end">
+            {authenticated ? (
+              <>
+                <Link
+                  href="/keywords"
+                  className="bg-white hover:bg-neutral-50 text-neutral-850 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 transition shadow-sm active:scale-95 flex items-center gap-1.5"
+                >
+                  ⚙️ Pengaturan Keyword
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold border border-transparent transition shadow-sm active:scale-95 cursor-pointer"
+                >
+                  Keluar Admin
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-white hover:bg-neutral-50 text-neutral-850 px-4 py-2.5 rounded-xl text-sm font-bold border border-neutral-200 transition shadow-sm active:scale-95 flex items-center gap-1.5"
+              >
+                🔑 Login Admin
+              </Link>
+            )}
+            
             <button 
               onClick={fetchNews}
               disabled={refreshing}
@@ -311,8 +439,8 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Statistik Cards */}
-        <section className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+        {/* Statistik Kategori Berita */}
+        <section className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
           <div className="bg-white border border-neutral-200 p-4.5 rounded-2xl shadow-sm border-l-4 border-l-neutral-400">
             <p className="text-xs font-bold uppercase tracking-wider text-neutral-450">Total Berita</p>
             <p className="text-3xl font-black text-neutral-900 mt-2">{stats.total}</p>
@@ -336,6 +464,69 @@ export default function Dashboard() {
           <div className="bg-white border border-neutral-200 p-4.5 rounded-2xl shadow-sm border-l-4 border-l-purple-500">
             <p className="text-xs font-bold uppercase tracking-wider text-neutral-450">Gawai</p>
             <p className="text-3xl font-black text-purple-600 mt-2">{stats.gawai}</p>
+          </div>
+        </section>
+
+        {/* Sentiment Analysis Visual Breakdown Panel */}
+        <section className="bg-white border border-neutral-200 p-6 rounded-3xl shadow-sm mb-6">
+          <h2 className="text-sm font-black uppercase tracking-wider text-neutral-700 mb-4 flex items-center gap-1.5">
+            📊 Persentase Sentimen Pemberitaan
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            {/* Visual Progress Bar Chart */}
+            <div className="md:col-span-2 space-y-4">
+              <div>
+                <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
+                  <span>😊 Sentimen Positif</span>
+                  <span className="text-emerald-600 font-extrabold">{sentimentStats.positifPct}% ({sentimentStats.positif} berita)</span>
+                </div>
+                <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
+                  <div 
+                    className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${sentimentStats.positifPct}%` }}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
+                  <span>😠 Sentimen Negatif</span>
+                  <span className="text-rose-600 font-extrabold">{sentimentStats.negatifPct}% ({sentimentStats.negatif} berita)</span>
+                </div>
+                <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
+                  <div 
+                    className="bg-rose-500 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${sentimentStats.negatifPct}%` }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs font-bold text-neutral-600 mb-1.5">
+                  <span>😐 Sentimen Netral</span>
+                  <span className="text-neutral-500 font-extrabold">{sentimentStats.netralPct}% ({sentimentStats.netral} berita)</span>
+                </div>
+                <div className="w-full bg-neutral-100 h-3.5 rounded-full overflow-hidden border border-neutral-200">
+                  <div 
+                    className="bg-neutral-400 h-full rounded-full transition-all duration-500" 
+                    style={{ width: `${sentimentStats.netralPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Summary card */}
+            <div className="bg-neutral-50 border border-neutral-200 p-5 rounded-2xl flex flex-col justify-center items-center text-center">
+              <p className="text-xs font-bold uppercase tracking-wider text-neutral-450">Analisis Sentimen</p>
+              <div className="mt-2.5 flex items-center gap-1.5">
+                <span className="text-3xl font-black text-emerald-600">{sentimentStats.positifPct}%</span>
+                <span className="text-neutral-300 font-bold">/</span>
+                <span className="text-3xl font-black text-rose-600">{sentimentStats.negatifPct}%</span>
+              </div>
+              <p className="text-[11px] font-bold text-neutral-500 mt-2 leading-relaxed">
+                Rasio sentimen positif terhadap negatif dalam monitoring media Puspeka saat ini.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -507,28 +698,50 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Dropdown Kurasi Manual & Tombol Buka */}
-                  <div className="flex flex-row md:flex-col lg:flex-row items-center gap-3 w-full md:w-auto self-end md:self-center pt-3 md:pt-0 border-t border-neutral-200 md:border-none justify-between md:justify-end">
-                    <div className="flex items-center gap-2">
-                      {getStatusBadge(item.status)}
-                      <select
-                        value={item.status}
-                        onChange={(e) => handleStatusChange(item.id, e.target.value)}
-                        className="bg-white border border-neutral-200 text-xs font-bold px-3 py-2 rounded-lg text-neutral-855 focus:outline-none focus:ring-1 focus:ring-indigo-650 cursor-pointer"
-                      >
-                        <option value="Belum diperiksa">Belum diperiksa</option>
-                        <option value="Relevan">Relevan</option>
-                        <option value="Tidak relevan">Tidak relevan</option>
-                        <option value="Penting">Penting</option>
-                        <option value="Perlu perhatian">Perlu perhatian</option>
-                      </select>
+                  {/* Status, Sentimen & Tombol Buka */}
+                  <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto self-stretch md:self-center pt-3 md:pt-0 border-t border-neutral-100 md:border-none justify-between md:justify-end">
+                    {/* Status & Sentimen Badges / Selects */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Curation Status */}
+                      <div className="flex items-center gap-1.5">
+                        {getStatusBadge(item.status)}
+                        {authenticated && (
+                          <select
+                            value={item.status}
+                            onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                            className="bg-white border border-neutral-200 text-xs font-bold px-2 py-1.5 rounded-lg text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-655 cursor-pointer"
+                          >
+                            <option value="Belum diperiksa">Belum diperiksa</option>
+                            <option value="Relevan">Relevan</option>
+                            <option value="Tidak relevan">Tidak relevan</option>
+                            <option value="Penting">Penting</option>
+                            <option value="Perlu perhatian">Perlu perhatian</option>
+                          </select>
+                        )}
+                      </div>
+
+                      {/* Sentiment */}
+                      <div className="flex items-center gap-1.5">
+                        {getSentimentBadge(item.sentiment)}
+                        {authenticated && (
+                          <select
+                            value={item.sentiment}
+                            onChange={(e) => handleSentimentChange(item.id, e.target.value)}
+                            className="bg-white border border-neutral-200 text-xs font-bold px-2 py-1.5 rounded-lg text-neutral-700 focus:outline-none focus:ring-1 focus:ring-indigo-655 cursor-pointer"
+                          >
+                            <option value="Netral">Netral</option>
+                            <option value="Positif">Positif</option>
+                            <option value="Negatif">Negatif</option>
+                          </select>
+                        )}
+                      </div>
                     </div>
                     
                     <a 
                       href={item.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4.5 py-2 rounded-lg transition text-center shadow-sm active:scale-95"
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4.5 py-2.5 rounded-lg transition text-center shadow-sm active:scale-95 flex items-center justify-center"
                     >
                       Buka Berita ↗
                     </a>

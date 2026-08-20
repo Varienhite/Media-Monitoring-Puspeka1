@@ -22,11 +22,13 @@ export async function GET(request: Request) {
     
     // 3. Ambil data berita yang sudah ada di database untuk deduplikasi
     const existingNews = await prisma.news.findMany({
-      select: { url: true, title: true }
+      select: { url: true, title: true, media: true }
     });
     
     const existingUrls = new Set(existingNews.map(n => n.url));
-    const existingNormalizedTitles = new Set(existingNews.map(n => normalizeTitle(n.title)));
+    const existingTitleMediaSet = new Set(
+      existingNews.map(n => `${normalizeTitle(n.media)}_${normalizeTitle(n.title)}`)
+    );
 
     // 4. Fetch berita baru dari Google News RSS
     for (const item of activeKeywords) {
@@ -38,16 +40,29 @@ export async function GET(request: Request) {
           for (const entry of feed.items) {
             if (!entry.link || !entry.title) continue;
 
-            // Bersihkan judul  nama media bawaan Google News 
+            // Bersihkan judul nama media bawaan Google News 
             const titleParts = entry.title.split(' - ');
             const mediaName = titleParts.length > 1 ? titleParts.pop() : 'Media Online';
             const cleanTitle = titleParts.join(' - ').trim();
 
             const normTitle = normalizeTitle(cleanTitle);
+            const titleMediaKey = `${normalizeTitle(mediaName || 'Media Online')}_${normTitle}`;
 
-            // Cek duplikasi berdasarkan URL atau kemiripan judul 
-            if (existingUrls.has(entry.link) || existingNormalizedTitles.has(normTitle)) {
+            // Cek duplikasi berdasarkan URL atau kombinasi media + judul
+            if (existingUrls.has(entry.link) || existingTitleMediaSet.has(titleMediaKey)) {
               continue;
+            }
+
+            // Auto-labeling sentiment berdasarkan kata kunci pada judul
+            let initialSentiment = 'Netral';
+            const lowerTitle = cleanTitle.toLowerCase();
+            const negativeKeywords = ['tawuran', 'bullying', 'kekerasan', 'pelecehan', 'perundungan', 'intoleransi', 'hoaks', 'negatif', 'sanksi', 'konflik', 'bentrok', 'korban'];
+            const positiveKeywords = ['juara', 'prestasi', 'sukses', 'penghargaan', 'kreatif', 'inovasi', 'positif', 'aman', 'harmonis', 'rukun', 'damai'];
+
+            if (negativeKeywords.some(kw => lowerTitle.includes(kw))) {
+              initialSentiment = 'Negatif';
+            } else if (positiveKeywords.some(kw => lowerTitle.includes(kw))) {
+              initialSentiment = 'Positif';
             }
 
             // Simpan berita baru ke database
@@ -62,12 +77,13 @@ export async function GET(request: Request) {
                 keyword: item.keyword,
                 program: item.program,
                 status: 'Belum diperiksa',
+                sentiment: initialSentiment,
               },
             });
 
             // Tambahkan ke Set agar tidak memproses duplikat dalam run yang sama
             existingUrls.add(entry.link);
-            existingNormalizedTitles.add(normTitle);
+            existingTitleMediaSet.add(titleMediaKey);
           }
         }
       } catch (rssErr) {
@@ -90,7 +106,13 @@ export async function GET(request: Request) {
       gawai: newsList.filter(n => n.program === 'Pembatasan Gawai').length,
     };
 
-    return NextResponse.json({ success: true, news: newsList, stats });
+    const sentimentStats = {
+      positif: newsList.filter(n => n.sentiment === 'Positif').length,
+      negatif: newsList.filter(n => n.sentiment === 'Negatif').length,
+      netral: newsList.filter(n => n.sentiment === 'Netral').length,
+    };
+
+    return NextResponse.json({ success: true, news: newsList, stats, sentimentStats });
   } catch (error: any) {
     console.error("API Error:", error);
     return NextResponse.json({ success: false, error: error.message || 'Terjadi kesalahan pada server' }, { status: 500 });
@@ -99,13 +121,18 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, status } = await request.json();
+    const { id, status, sentiment } = await request.json();
+    
+    const dataToUpdate: any = {};
+    if (status !== undefined) dataToUpdate.status = status;
+    if (sentiment !== undefined) dataToUpdate.sentiment = sentiment;
+
     const updated = await prisma.news.update({
       where: { id: Number(id) },
-      data: { status },
+      data: dataToUpdate,
     });
     return NextResponse.json({ success: true, updated });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message || 'Gagal mengupdate status' }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || 'Gagal mengupdate berita' }, { status: 500 });
   }
 }

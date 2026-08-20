@@ -24,5 +24,6 @@ model News {
   keyword   String
   program   String
   status    String   @default("Belum diperiksa")
+  sentiment String   @default("Netral")
   createdAt DateTime @default(now())
 }
