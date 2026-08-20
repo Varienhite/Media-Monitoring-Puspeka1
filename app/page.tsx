@@ -346,51 +346,26 @@ export default function Dashboard() {
         
         {/* Header Section with Satker & Kemendikdasmen branding */}
         <header className="mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-b border-neutral-200 pb-6">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            {/* Logo Kemendikdasmen (Placeholder) */}
-            <div className="relative w-16 h-16 bg-white border border-neutral-200 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
+            {/* Logo 1: Kemendikdasmen - Pusat Penguatan Karakter */}
+            <div className="h-16 flex items-center justify-center">
               <img 
-                src="/logo-kemendikdasmen.png" 
-                alt="Logo Kemendikdasmen" 
-                className="w-full h-full object-contain p-1"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                  const parent = (e.target as HTMLElement).parentElement;
-                  if (parent && !parent.querySelector('.fallback-text')) {
-                    const fallback = document.createElement('div');
-                    fallback.className = 'fallback-text text-[9px] font-black text-center text-neutral-400 select-none uppercase px-1 leading-tight';
-                    fallback.innerText = 'Logo\nKementerian';
-                    parent.appendChild(fallback);
-                  }
-                }}
+                src="/Logo/Logo 1.png" 
+                alt="Logo Kemendikdasmen - Pusat Penguatan Karakter" 
+                className="h-full w-auto object-contain"
               />
             </div>
             
-            {/* Logo Puspeka (Placeholder) */}
-            <div className="relative w-16 h-16 bg-white border border-neutral-200 rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
-              <img 
-                src="/logo-puspeka.png" 
-                alt="Logo Puspeka" 
-                className="w-full h-full object-contain p-1"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                  const parent = (e.target as HTMLElement).parentElement;
-                  if (parent && !parent.querySelector('.fallback-text')) {
-                    const fallback = document.createElement('div');
-                    fallback.className = 'fallback-text text-[9px] font-black text-center text-neutral-400 select-none uppercase px-1 leading-tight';
-                    fallback.innerText = 'Logo\nPuspeka';
-                    parent.appendChild(fallback);
-                  }
-                }}
-              />
-            </div>
+            {/* Visual separator line (hidden on small screens) */}
+            <div className="hidden sm:block h-10 w-px bg-neutral-350" />
             
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar dan Menengah</p>
-              <h1 className="text-2xl font-black text-neutral-900 leading-tight">
-                Pusat Penguatan Karakter
-              </h1>
-              <p className="text-xs text-neutral-500 font-bold">Sistem Monitoring Media Online & Kurasi Berita Terpadu</p>
+            {/* Logo 2: Pendidikan Bermutu Untuk Semua */}
+            <div className="h-12 flex items-center justify-center">
+              <img 
+                src="/Logo/Logo 2.png" 
+                alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
+                className="h-full w-auto object-contain"
+              />
             </div>
           </div>
           
