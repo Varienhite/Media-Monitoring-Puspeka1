@@ -39,25 +39,24 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-4">
-        {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
-        <div className="flex justify-center">
-          <div className="h-16 flex items-center justify-center">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
+        {/* Branding Layout with Logo 3 on the left and titles on the right */}
+        <div className="flex items-center justify-center gap-4 mb-2">
+          {/* Logo 3: Pendidikan Bermutu Untuk Semua */}
+          <div className="h-14 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img 
               src="/Logo/Logo 3.png" 
               alt="Logo Slogan - Pendidikan Bermutu Untuk Semua" 
               className="h-full w-auto object-contain"
             />
           </div>
-        </div>
-
-        <div className="space-y-1">
-          <h1 className="text-2xl font-extrabold text-neutral-900 tracking-tight">
-            Pusat Penguatan Karakter
-          </h1>
-          <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">
-            Kementerian Pendidikan Dasar dan Menengah
-          </p>
+          
+          <div className="space-y-0.5 text-left">
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">Kementerian Pendidikan Dasar</p>
+            <h1 className="text-lg font-black text-neutral-900 leading-tight">
+              Pusat Penguatan Karakter
+            </h1>
+          </div>
         </div>
       </div>
 
@@ -99,7 +98,7 @@ export default function LoginPage() {
 
               <Link
                 href="/"
-                className="w-full flex justify-center py-2.5 px-4 border border-neutral-200 rounded-xl text-sm font-bold text-neutral-770 bg-white hover:bg-neutral-50 focus:outline-none transition text-center cursor-pointer"
+                className="w-full flex justify-center py-2.5 px-4 border border-neutral-200 rounded-xl text-sm font-bold text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none transition text-center cursor-pointer"
               >
                 Kembali ke Dashboard
               </Link>
